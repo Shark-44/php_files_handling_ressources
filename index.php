@@ -20,11 +20,23 @@ function listerFichiers($chemin) {
 
     closedir($dir);
 }
+// Enregistrer les modifications si le formulaire est soumis
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["contenu"]) && isset($_POST["file"])) {
+    $fichier = $_POST["file"];
+    $contenu_modifie = $_POST["contenu"];
+
+    // Enregistrez le contenu modifié dans le fichier
+    file_put_contents($fichier, $contenu_modifie);
+
+    // Afficher un message de succès ou rediriger l'utilisateur vers une autre page si nécessaire
+    echo '<script>alert("Enregistré avec succès")</script>';
+}
 
 // Afficher les fichiers dans un sous-dossier sélectionné
 if (isset($_GET['d'])) {
     $sous_dossier = "./files/" . $_GET['d'];
     $dir_sous_dossier = opendir($sous_dossier);
+
     while ($elementb = readdir($dir_sous_dossier)) {
         if (!in_array($elementb, array(".", ".."))) {
             $chemin_elementb = "$sous_dossier/$elementb";
@@ -44,10 +56,18 @@ if (isset($_GET['d'])) {
                 echo "<a href='?f=" . urlencode($chemin_elementb) . "'>$elementb (Fichier)</a><br>";
             }
         }
-
     }
 
     closedir($dir_sous_dossier);
+
+    // Afficher un lien pour remonter au dossier parent
+    if (isset($_GET['d']) && strlen($_GET['d']) > 0){
+    $dossier_parent = realpath($sous_dossier . '/..');
+    if ($sous_dossier !== "./files" && $dossier_parent !== false && file_exists($dossier_parent)) {
+        $dossier_parent_relative = str_replace(realpath("./files"), "", $dossier_parent);
+        echo "<br><a href='?d=" . urlencode($dossier_parent_relative) . "'>Remonter au dossier parent</a>";
+    }
+}
 
 } else if (isset($_GET["f"])) {
     // Afficher le contenu d'un fichier sélectionné
@@ -65,11 +85,5 @@ if (isset($_GET['d'])) {
     $dir = "./files";
     listerFichiers($dir);
 }
-    // Afficher un lien pour remonter au dossier parent
-    $dossier_parent = realpath($sous_dossier . '/..');
-        if ($sous_dossier !== "./files" && $dossier_parent !== false) {
-            $dossier_parent_relative = str_replace(realpath("./files"), "", $dossier_parent);
-                echo "<br><a href='?d=" . urlencode($dossier_parent_relative) . "'>Remonter au dossier parent</a>";
-            }
 ?>
 <?php include('inc/foot.php'); ?>
