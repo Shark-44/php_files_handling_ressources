@@ -70,6 +70,6 @@ if (isset($_GET['d'])) {
         if ($sous_dossier !== "./files" && $dossier_parent !== false) {
             $dossier_parent_relative = str_replace(realpath("./files"), "", $dossier_parent);
                 echo "<br><a href='?d=" . urlencode($dossier_parent_relative) . "'>Remonter au dossier parent</a>";
-        }
+            }
 ?>
 <?php include('inc/foot.php'); ?>
