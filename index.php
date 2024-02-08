@@ -1,35 +1,28 @@
 <?php include('inc/head.php'); ?>
 
 <?php
-function listerFichiers($chemin) {
-    $dir = opendir("./files");
+// initialisation du repertoire
+$dir = "./files";
 
-    while ($element = readdir($dir)) {
-        if (!in_array($element, array(".", ".."))) {
-            $chemin_element = "$chemin/$element";
-            
-            if (is_dir($chemin_element)) {
-                // Si c'est un dossier, créer un lien pour explorer son contenu
-                echo "<a href='?d=$element'>$element </a><br>";
-                
-                // Liste récursive des fichiers dans le sous-dossier
-                listerFichiers($chemin_element);
+// Supprimer un dossier ou un fichier
+function deleteElement($element) {
+    echo '<a href="?delete_element=' . urlencode($element) . '"><img src="assets/images/delete.png" alt="Supprimer" style="width: 16px;"></a>';
+}
+
+// Afficher les éléments dans le répertoire principal
+if (!isset($_GET['d'])) {
+    if (is_dir($dir)){
+        if ($dh = opendir($dir)){
+            while (($file = readdir($dh)) !== false){
+                if (!in_array($file, array(".", ".."))) {
+                    echo '<img src="assets/images/dossier.png" alt="dossier" style="width: 30px">'," ","<a href='?d=" . "'>$file </a>";
+                    deleteElement($file);
+                    echo "<br>";
+                }
             }
+            closedir($dh);  
         }
     }
-
-    closedir($dir);
-}
-// Enregistrer les modifications si le formulaire est soumis
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["contenu"]) && isset($_POST["file"])) {
-    $fichier = $_POST["file"];
-    $contenu_modifie = $_POST["contenu"];
-
-    // Enregistrez le contenu modifié dans le fichier
-    file_put_contents($fichier, $contenu_modifie);
-
-    // Afficher un message de succès ou rediriger l'utilisateur vers une autre page si nécessaire
-    echo '<script>alert("Enregistré avec succès")</script>';
 }
 
 // Afficher les fichiers dans un sous-dossier sélectionné
@@ -40,50 +33,88 @@ if (isset($_GET['d'])) {
     while ($elementb = readdir($dir_sous_dossier)) {
         if (!in_array($elementb, array(".", ".."))) {
             $chemin_elementb = "$sous_dossier/$elementb";
+            
             if (is_dir($chemin_elementb)) {
-                // Si c'est un dossier, créer un lien pour explorer son contenu
                 $nouveau_sous_dossier = $_GET['d'] . '/' . $elementb;
-                echo "<a href='?d=" . urlencode($nouveau_sous_dossier) . "'>$elementb (Dossier)</a><br>";
-                
-                // Liste récursive des fichiers dans le sous-dossier
-                if (file_exists($chemin_elementb)) {
-                    listerFichiers($chemin_elementb);
-                } else {
-                    echo "Le dossier $elementb n'existe pas.";
-                }
+                echo '<img src="assets/images/dossier.png" alt="dossier" style="width: 30px">'," ","<a href='?d=" . urlencode($nouveau_sous_dossier) . "'>$elementb </a>";
+                deleteElement($elementb);
+                echo "<br>";
             } else {
-                // Si c'est un fichier, créer un lien pour le visualiser
-                echo "<a href='?f=" . urlencode($chemin_elementb) . "'>$elementb (Fichier)</a><br>";
+                echo '<img src="assets/images/fichier.png" alt="fichier" style="width: 30px">'," ","<a href='?f=" . urlencode($chemin_elementb) . "'>$elementb</a>";
+                deleteElement($chemin_elementb);
+                echo "<br>";
             }
         }
     }
 
     closedir($dir_sous_dossier);
+}
 
-    // Afficher un lien pour remonter au dossier parent
-    if (isset($_GET['d']) && strlen($_GET['d']) > 0){
-    $dossier_parent = realpath($sous_dossier . '/..');
-    if ($sous_dossier !== "./files" && $dossier_parent !== false && file_exists($dossier_parent)) {
-        $dossier_parent_relative = str_replace(realpath("./files"), "", $dossier_parent);
-        echo "<br><a href='?d=" . urlencode($dossier_parent_relative) . "'>Remonter au dossier parent</a>";
+// Supprimer un dossier ou un fichier 
+if (isset($_GET['delete_element']) && !empty($_GET['delete_element'])) {
+    $element_a_supprimer =  $_GET['delete_element'];
+    var_dump ($element_a_supprimer);
+    echo "Tentative de suppression de : " . $element_a_supprimer; // Ajout de cette ligne pour déboguer
+
+    if ( rmdir($element_a_supprimer)) {
+        echo "Le dossier a été supprimé avec succès.";
+    } elseif (is_file($element_a_supprimer) && unlink($element_a_supprimer)) {
+        echo "Le fichier a été supprimé avec succès.";
+    } else {
+        echo "Erreur lors de la suppression de l'élément.";
     }
 }
+?>
 
-} else if (isset($_GET["f"])) {
-    // Afficher le contenu d'un fichier sélectionné
+  <?php
+      // Afficher un lien pour remonter au dossier parent
+      if (isset($_GET['d']) && strlen($_GET['d']) > 0){
+        $dossier_parent = realpath($sous_dossier . '/..');
+        if ($sous_dossier !== "./files" && $dossier_parent !== false && file_exists($dossier_parent)) {
+            $dossier_parent_relative = str_replace(realpath("./files"), "", $dossier_parent);
+            echo "<br><a href='?d=" . urlencode($dossier_parent_relative) . "'>Remonter au dossier parent</a>";
+        }
+    }
+  ?>
+<?php
+$contenu = '';
+
+// Chargement du fichier dans textarea
+if (isset($_GET["f"])) {
     $fichier = urldecode($_GET["f"]);
-    $contenu = file_get_contents($fichier);
 
-    // Afficher le formulaire pour modifier le contenu du fichier
-    echo "<form method='POST' action='index.php'>";
-    echo "<textarea name='contenu' style='width:100%;height:200px'>$contenu</textarea>";
-    echo "<input type='hidden' name='file' value='$fichier'>";
-    echo "<input type='submit' value='envoyer'>";
-    echo "</form>";
-} else {
-    // Aucun dossier ni fichier sélectionné, afficher le contenu de ./files
-    $dir = "./files";
-    listerFichiers($dir);
+    if (is_file($fichier)) {
+        $contenu = file_get_contents($fichier);
+    } else {
+        echo "Le fichier n'existe pas.";
+        echo $fichier;
+    }
+}
+// Execution du submit
+if (isset($_POST["contenu"]) && !empty($_POST["contenu"])) {
+    $fichier = urldecode($_POST["file"]);
+   
+    $file = fopen($fichier, "w");
+
+    if ($file) {
+        fwrite($file, $_POST["contenu"]);
+        fclose($file);
+    } else {
+        echo "Erreur lors de l'ouverture du fichier.";
+    }
 }
 ?>
+
+
+
+<h4>Editeur</h4>
+<form method='POST' action='index.php'>
+    <textarea name='contenu' style='width:100%;height:200px'><?php echo $contenu; ?></textarea>
+    <input type='hidden' name='file' value='<?php echo $fichier; ?>'>
+    <input type='submit' value='envoyer'>
+</form>
+
+
+
+
 <?php include('inc/foot.php'); ?>
