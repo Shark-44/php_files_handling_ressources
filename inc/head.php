@@ -7,8 +7,10 @@
     <link rel="stylesheet" href="assets/custom.css"/>
 </head>
 <body>
-<nav class="navbar navbar-default">
+<nav class="navbar navbar-default" style="display: flex; align-items: center;">
+<img src="assets\images\FBI-LOGO2.png" alt="logo" style="width: 100px">
     <div class="container">
+    
         <div class="navbar-header">
             <a class="navbar-brand" href="#">
                 <h1><strong>FBI:</strong> X-files archives</h1>
@@ -17,8 +19,10 @@
         </div>
     </div>
 </nav>
-<div class="container">
-    <div class="panel panel-default">
+<div class="container" style="display: flex; align-items: center; width: 90vw;">
+
+    <div class="panel panel-default" style="width: 90vw;">
+        
         <div class="panel-heading">
             <h3 class="panel-title text-uppercase">UFO's Activities report</h3>
         </div>
