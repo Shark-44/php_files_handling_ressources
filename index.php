@@ -53,15 +53,11 @@ if (isset($_GET['d'])) {
 // Supprimer un dossier ou un fichier 
 if (isset($_GET['delete_element']) && !empty($_GET['delete_element'])) {
     $element_a_supprimer = $_GET['delete_element'];
-    var_dump(file_exists($element_a_supprimer));
-    var_dump(file_exists(dirname($element_a_supprimer)));
 
     
     if (is_file($element_a_supprimer)) {
         $success = unlink($element_a_supprimer);
-    } elseif (is_dir($element_a_supprimer)) {
-        echo "ici";
-       echo $element_a_supprimer;
+    } elseif (is_dir("..")) {
         RemoveAll($element_a_supprimer);
         $success = true;
     } else {
@@ -76,23 +72,47 @@ if (isset($_GET['delete_element']) && !empty($_GET['delete_element'])) {
 }
 
 // Fonction récursive pour supprimer un dossier et son contenu
-function RemoveAll($element_a_supprimer) {
-    $items = scandir($element_a_supprimer);
-    echo $element_a_supprimer;
+function RemoveAll($nom_dossier_a_supprimer) {
+    $dossiers_trouves = glob('*/*/' . $nom_dossier_a_supprimer, GLOB_ONLYDIR);
 
-    foreach ($items as $item) {
-        if ($item !== '.' && $item !== '..') {
-            $path = $element_a_supprimer . '/' . $item;
-            if (is_dir($path)) {
-                RemoveAll($path);
-            } elseif (is_file($path)) {
-                unlink($path);
-            }
-        }
+    if (empty($dossiers_trouves)) {
+       
+        return;
     }
 
-    rmdir($element_a_supprimer);
+    foreach ($dossiers_trouves as $dossier_trouve) {
+        $cheminAbsolu = realpath($dossier_trouve);
+        
+
+        $items = scandir($cheminAbsolu);
+
+        if ($items === false) {
+            echo "Erreur : Impossible de lire le contenu du répertoire $cheminAbsolu.";
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item !== '.' && $item !== '..') {
+                $path = $cheminAbsolu . '/' . $item;
+
+                if (is_dir($path)) {
+                    RemoveAll($path);
+                } elseif (is_file($path)) {
+                    unlink($path);
+                }
+            }
+        }
+
+        if (!rmdir($cheminAbsolu)) {
+            echo "Erreur : Impossible de supprimer le répertoire $cheminAbsolu.";
+        }
+    }
 }
+
+// Utilisation de la fonction en passant le nom du dossier
+RemoveAll('nom_du_dossier_a_supprimer');
+
+
 
 ?>
 
