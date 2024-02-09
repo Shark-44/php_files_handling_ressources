@@ -29,12 +29,10 @@ if (!isset($_GET['d'])) {
 if (isset($_GET['d'])) {
     $sous_dossier = "./files/" . $_GET['d'];
     $dir_sous_dossier = opendir($sous_dossier);
-    $chemins = array();
 
     while ($elementb = readdir($dir_sous_dossier)) {
         if (!in_array($elementb, array(".", ".."))) {
             $chemin_elementb = "$sous_dossier/$elementb";
-            $chemins[] = $chemin_elementb;
             
             if (is_dir($chemin_elementb)) {
                 $nouveau_sous_dossier = $_GET['d'] . '/' . $elementb;
@@ -55,43 +53,27 @@ if (isset($_GET['d'])) {
 // Supprimer un dossier ou un fichier 
 if (isset($_GET['delete_element']) && !empty($_GET['delete_element'])) {
     $element_a_supprimer = $_GET['delete_element'];
+    var_dump(file_exists($element_a_supprimer));
+    var_dump(file_exists(dirname($element_a_supprimer)));
 
-    // Obtenez le chemin du dossier parent du fichier actuel
-    $dossier_parent = dirname($_SERVER["DOCUMENT_ROOT"] . $_SERVER['PHP_SELF']);
     
-    // Chemin du sous-dossier
-    $chemin = ''; // Vous devriez remplir cela avec la valeur correcte
+    if (is_file($element_a_supprimer)) {
+        $success = unlink($element_a_supprimer);
+    } elseif (is_dir($element_a_supprimer)) {
+        echo "ici";
+       echo $element_a_supprimer;
+        RemoveAll($element_a_supprimer);
+        $success = true;
+    } else {
+        $success = false;
+    }
 
-    // Construisez le chemin complet pour le dossier ou le fichier à supprimer
-    $chemin_element_a_supprimer = $dossier_parent . "/files" . $chemin . "/" . $element_a_supprimer;
-
-    echo "Tentative de suppression de : " . $chemin_element_a_supprimer; // Ajout de cette ligne pour déboguer
-
-    if (is_dir($chemin_element_a_supprimer)) {
-        rmdir($chemin_element_a_supprimer);
-        echo "Le dossier a été supprimé avec succès.";
-    } elseif (is_file($chemin_element_a_supprimer)) {
-        unlink($chemin_element_a_supprimer);
-        echo "Le fichier a été supprimé avec succès.";
+    if ($success) {
+        echo "L'élément a été supprimé avec succès.";
     } else {
         echo "Erreur lors de la suppression de l'élément.";
     }
 }
-
-
-// fonction pour savoir si un dossier enfant d'un dossier enfant
-function isChildFolder($parentFolder, $childFolder)
-{
-    $parentFolder = rtrim($parentFolder, '/') . '/';
-
-    // Utilise realpath pour résoudre les liens symboliques et obtenir des chemins absolus
-    $realParent = realpath($parentFolder);
-    $realChild = realpath($parentFolder . $childFolder);
-
-    // Vérifiez si le dossier enfant commence par le dossier parent
-    return $realParent !== false && $realChild !== false && strpos($realChild, $realParent) === 0;
-}
-
 
 // Fonction récursive pour supprimer un dossier et son contenu
 function RemoveAll($element_a_supprimer) {
