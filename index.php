@@ -1,7 +1,7 @@
 <?php
 include('./function.php');
 
-// Ajout de ce débogage pour voir la valeur de $sous_dossier
+
 if (isset($_GET['d'])) {
     $sous_dossier = "./files/" . $_GET['d'];
     $mavariable = $sous_dossier;
