@@ -1,3 +1,6 @@
+<?php
+global $mavariable;
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,14 +11,14 @@
 </head>
 <body>
 <nav class="navbar navbar-default" style="display: flex; align-items: center;">
-<img src="assets\images\FBI-LOGO2.png" alt="logo" style="width: 100px">
+    <img src="assets\images\FBI-LOGO2.png" alt="logo" style="width: 100px">
     <div class="container">
-    
-        <div class="navbar-header">
+        <div class="navbar-header" style="display: flex; flex-direction: column;" >
             <a class="navbar-brand" href="#">
                 <h1><strong>FBI:</strong> X-files archives</h1>
             </a>
-            <h2></h2>
+            <br>
+            <h2>Le dossier en cours : <?php echo $mavariable; ?></h2>
         </div>
     </div>
 </nav>
@@ -27,3 +30,4 @@
             <h3 class="panel-title text-uppercase">UFO's Activities report</h3>
         </div>
         <div class="panel-body">
+            <!-- The rest of your head.php content -->

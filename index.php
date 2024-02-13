@@ -1,8 +1,23 @@
-<?php include('inc/head.php'); ?>
+<?php
+include('./function.php');
+
+// Ajout de ce débogage pour voir la valeur de $sous_dossier
+if (isset($_GET['d'])) {
+    $sous_dossier = "./files/" . $_GET['d'];
+    $mavariable = $sous_dossier;
+    setMavariable($mavariable);
+} else {
+    $mavariable = "default_value";
+}
+
+include('inc/head.php');
+?>
+
 
 <?php
 // initialisation du repertoire
 $dir = "./files";
+
 
 // Supprimer un dossier ou un fichier
 function deleteElement($element) {
@@ -28,6 +43,7 @@ if (!isset($_GET['d'])) {
 // Afficher les fichiers dans un sous-dossier sélectionné
 if (isset($_GET['d'])) {
     $sous_dossier = "./files/" . $_GET['d'];
+    $mavariable = $sous_dossier;
     $dir_sous_dossier = opendir($sous_dossier);
 
     while ($elementb = readdir($dir_sous_dossier)) {
@@ -49,6 +65,8 @@ if (isset($_GET['d'])) {
 
     closedir($dir_sous_dossier);
 }
+
+
 
 // Supprimer un dossier ou un fichier 
 if (isset($_GET['delete_element']) && !empty($_GET['delete_element'])) {
